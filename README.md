@@ -99,6 +99,19 @@ curl -fsSL https://raw.githubusercontent.com/alfredxw/denova/master/scripts/inst
 2. 创建或导入一本书，也可以直接打开已有项目目录。
 3. 从「写作」开始创作，或从「游戏」创建一条互动故事线；需要生成图片时再配置图像模型。
 
+### Docker Compose 部署
+
+使用镜像 `ghcr.io/planetsider/denova`（`linux/amd64` / `linux/arm64`）部署，数据保存在本地 `./data` 目录：
+
+```bash
+git clone https://github.com/PlanetSider/denova.git
+cd denova
+cp .env.example .env  # 设置登录用户名和密码
+docker compose up -d
+```
+
+浏览器打开 `http://localhost:8080` 并使用 `.env` 中的凭据登录；详细说明与升级方式见 [docs/docker-compose.md](docs/docker-compose.md)。
+
 ### 从源码运行
 
 需要 Go 1.26.6+、Node.js 22.13+、pnpm、ripgrep 和 Bash。Windows 请在 Git Bash 或 WSL 中运行以下命令。

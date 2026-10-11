@@ -99,6 +99,19 @@ For stable use, choose a Release. The `master` branch may contain unreleased cha
 2. Create or import a book, or open an existing project directory.
 3. Start creating from Writing, or create an interactive storyline from Game. Configure an image model only when you need image generation.
 
+### Docker Compose Deployment
+
+Deploy with the image `ghcr.io/planetsider/denova` (`linux/amd64` / `linux/arm64`); data is persisted in the local `./data` directory:
+
+```bash
+git clone https://github.com/PlanetSider/denova.git
+cd denova
+cp .env.example .env  # set the login username and password
+docker compose up -d
+```
+
+Open `http://localhost:8080` and sign in with the credentials from `.env`. See [docs/docker-compose.md](docs/docker-compose.md) for details and upgrades.
+
 ### Run from Source
 
 You need Go 1.26.6+, Node.js 22.13+, pnpm, ripgrep, and Bash. On Windows, run these commands from Git Bash or WSL.

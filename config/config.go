@@ -609,6 +609,25 @@ func overrideFromEnv(cfg *Config) {
 	if v := strings.TrimSpace(os.Getenv("DENOVA_SEARXNG_BASE_URL")); v != "" {
 		cfg.WebAccess.SearXNGBaseURL = strings.TrimRight(v, "/")
 	}
+	// Container/server deployments enable remote access through environment
+	// overrides. These values stay runtime-only and are never written back to
+	// configuration files; the environment password always wins over the hash
+	// persisted from the settings UI.
+	if v := envCompat("DENOVA_ALLOW_LAN_ACCESS", "NOVA_ALLOW_LAN_ACCESS"); v != "" {
+		if enabled, err := strconv.ParseBool(strings.TrimSpace(v)); err == nil {
+			cfg.AllowLANAccess = enabled
+		}
+	}
+	if v := strings.TrimSpace(envCompat("DENOVA_REMOTE_ACCESS_USERNAME", "NOVA_REMOTE_ACCESS_USERNAME")); v != "" {
+		cfg.RemoteAccessUsername = v
+	}
+	if v := strings.TrimSpace(envCompat("DENOVA_REMOTE_ACCESS_PASSWORD", "NOVA_REMOTE_ACCESS_PASSWORD")); v != "" {
+		if hash, err := HashRemoteAccessPassword(v); err == nil {
+			cfg.RemoteAccessPasswordHash = hash
+		} else {
+			slog.WarnContext(context.Background(), "[config] ignored DENOVA_REMOTE_ACCESS_PASSWORD", "error", err)
+		}
+	}
 }
 
 // ApplyModelEnvironment reapplies the released model environment variables
