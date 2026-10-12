@@ -106,11 +106,11 @@ Deploy with the image `ghcr.io/planetsider/denova` (`linux/amd64` / `linux/arm64
 ```bash
 git clone https://github.com/PlanetSider/denova.git
 cd denova
-cp .env.example .env  # set the login username and password
+# Edit docker-compose.yml first to set the login username and password
 docker compose up -d
 ```
 
-Open `http://localhost:8080` and sign in with the credentials from `.env`. See [docs/docker-compose.md](docs/docker-compose.md) for details and upgrades.
+Open `http://localhost:8080` and sign in with the credentials configured in the compose file. See [docs/docker-compose.md](docs/docker-compose.md) for details and upgrades.
 
 ### Run from Source
 

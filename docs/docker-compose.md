@@ -13,14 +13,15 @@ Denova 提供官方 Docker 镜像 `ghcr.io/planetsider/denova`，支持 `linux/a
    cd denova
    ```
 
-2. 配置登录凭据（容器无法使用桌面端「设置 → 访问」的首次配置流程，必须通过环境变量提供）：
+2. 配置登录凭据（容器无法使用桌面端「设置 → 访问」的首次配置流程，必须通过环境变量提供）。编辑 `docker-compose.yml`，修改 `DENOVA_REMOTE_ACCESS_USERNAME` 与 `DENOVA_REMOTE_ACCESS_PASSWORD`：
 
-   ```bash
-   cp .env.example .env
-   # 编辑 .env，设置 DENOVA_USERNAME 与 DENOVA_PASSWORD
+   ```yaml
+   environment:
+     DENOVA_REMOTE_ACCESS_USERNAME: admin
+     DENOVA_REMOTE_ACCESS_PASSWORD: change-me   # 首次启动前务必修改
    ```
 
-   `.env` 中的密码会在启动时做 bcrypt 哈希且只存在于内存中，不写入任何配置文件。该环境变量优先级高于界面中设置的密码；如希望完全由界面管理密码，从 `.env` 移除 `DENOVA_PASSWORD` 并改用预置数据目录的方式。
+   密码会在启动时做 bcrypt 哈希且只存在于内存中，不写入任何配置文件。该环境变量优先级高于界面中设置的密码；如希望完全由界面管理密码，删除 compose 中的 `DENOVA_REMOTE_ACCESS_PASSWORD` 行并改用预置数据目录的方式。若在本仓库目录内部署，注意不要把真实密码提交到远程仓库。
 
 3. 启动：
 
@@ -28,7 +29,7 @@ Denova 提供官方 Docker 镜像 `ghcr.io/planetsider/denova`，支持 `linux/a
    docker compose up -d
    ```
 
-4. 浏览器打开 `http://<主机地址>:8080`，使用 `.env` 中的用户名和密码登录。
+4. 浏览器打开 `http://<主机地址>:8080`，使用 compose 文件中配置的用户名和密码登录。
 
 ## 数据持久化
 
@@ -52,7 +53,7 @@ docker compose up -d
 
 ## 使用限制与说明
 
-- 首次登录必须使用 `.env` 凭据；登录后浏览器会话保持 30 天。
+- 首次登录必须使用 compose 文件中配置的凭据；登录后浏览器会话保持 30 天。
 - 通过公网或域名访问时，请使用 Caddy、Nginx 等反向代理提供 HTTPS，避免明文传输登录凭据。反代需要支持 SSE 与 WebSocket（终端、Agent 流式输出）。
 - Native 模式开箱即用；Codex / Claude Code 运行时需要在镜像内另装对应 CLI 并挂载其凭据目录（例如 `~/.codex`），镜像默认不包含。
 - 自动化浏览器工具依赖容器内的 Chrome/Chromium/Edge，镜像默认未安装；未安装时该工具不启用，其余功能不受影响。

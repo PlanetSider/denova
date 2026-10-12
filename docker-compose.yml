@@ -1,5 +1,7 @@
 # Denova Docker Compose 部署。
 # 数据通过 ./data 绑定挂载持久化，不使用 Docker named volume。
+# 部署配置直接写在本文件中；修改密码后即可 docker compose up -d。
+# 注意：如在本仓库目录内修改，请勿将真实密码提交到远程仓库。
 services:
   denova:
     image: ghcr.io/planetsider/denova:latest
@@ -8,12 +10,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      TZ: ${TZ:-Asia/Shanghai}
+      TZ: Asia/Shanghai
       DENOVA_DIR: /data/.denova
       DENOVA_WORKSPACE: /data/workspace
       DENOVA_ALLOW_LAN_ACCESS: "true"
-      DENOVA_REMOTE_ACCESS_USERNAME: ${DENOVA_USERNAME:-admin}
-      DENOVA_REMOTE_ACCESS_PASSWORD: ${DENOVA_PASSWORD:?Copy .env.example to .env and set DENOVA_PASSWORD first}
+      # 远程登录凭据；首次启动前务必修改密码。
+      DENOVA_REMOTE_ACCESS_USERNAME: admin
+      DENOVA_REMOTE_ACCESS_PASSWORD: change-me
     volumes:
       - ./data:/data
     healthcheck:

@@ -43,7 +43,6 @@ docs/tests/*
 .worktrees/
 .pnpm-store/
 .DS_Store
-.env
 .denova
 .nova
 prd

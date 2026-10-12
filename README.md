@@ -106,11 +106,11 @@ curl -fsSL https://raw.githubusercontent.com/alfredxw/denova/master/scripts/inst
 ```bash
 git clone https://github.com/PlanetSider/denova.git
 cd denova
-cp .env.example .env  # 设置登录用户名和密码
+# 先编辑 docker-compose.yml，设置登录用户名和密码
 docker compose up -d
 ```
 
-浏览器打开 `http://localhost:8080` 并使用 `.env` 中的凭据登录；详细说明与升级方式见 [docs/docker-compose.md](docs/docker-compose.md)。
+浏览器打开 `http://localhost:8080` 并使用 compose 文件中配置的凭据登录；详细说明与升级方式见 [docs/docker-compose.md](docs/docker-compose.md)。
 
 ### 从源码运行
 
