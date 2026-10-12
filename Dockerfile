@@ -9,7 +9,8 @@ ARG NODE_VERSION=22
 FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-bookworm-slim AS web
 WORKDIR /src/web
 RUN npm install --global pnpm@11.15.1
-COPY web/package.json web/pnpm-lock.yaml ./
+COPY web/package.json web/pnpm-lock.yaml web/pnpm-workspace.yaml ./
+COPY web/patches ./patches
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 COPY web/ ./
