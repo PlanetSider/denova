@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from 'next-themes'
 import { ArrowLeft, Ellipsis, Maximize } from 'lucide-react'
 import { toast } from 'sonner'
+import { randomUUID } from '@/lib/uuid'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { InlineErrorNotice } from '@/components/common/inline-error-notice'
@@ -75,7 +76,7 @@ export function GamePlayer({
     try {
       if (!force && exitGuard.current && frame.current?.contentWindow) {
         const ready = await new Promise<boolean>(resolve => {
-          const id = crypto.randomUUID()
+          const id = randomUUID()
           // This bounds a frame handshake, never the Agent's execution time.
           const timer = window.setTimeout(() => { exitReply.current = null; resolve(false) }, 45000)
           exitReply.current = { id, finish: ok => { clearTimeout(timer); exitReply.current = null; resolve(ok) } }

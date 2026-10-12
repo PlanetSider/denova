@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { ChevronDown, ChevronsDownUp, ChevronsUpDown, Layers, PanelRightClose, PanelRightOpen, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { randomUUID } from '@/lib/uuid'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -94,7 +95,7 @@ export function LoreIndexDocument({ projectId, items, headerActionsTarget, onSel
     let suffix = guide.groups.length + 1
     let name = t('lore.index.newSection', { number: suffix })
     while (guide.groups.some(g => g.name === name)) name = t('lore.index.newSection', { number: ++suffix })
-    const id = crypto.randomUUID()
+    const id = randomUUID()
     document.setGuide({ ...guide, groups: [...guide.groups, {
       id, name, purpose: '', body_markdown: '', default_detail: 'name',
     }] })

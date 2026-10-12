@@ -5,6 +5,7 @@ import { Minimize2, PanelsTopLeft, Puzzle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
+import { randomUUID } from '@/lib/uuid'
 import { GamePlayer } from './GamePlayer'
 import { PluginLauncher } from './PluginLauncher'
 import { PluginCommandDialog } from './PluginCommandDialog'
@@ -58,7 +59,7 @@ export function PluginWorkspaceProvider({ children }: { children: ReactNode }) {
     try {
       const runtime = await management<RuntimeSnapshot>('/plugin-actions/open', 'POST', {
         projectId: selection.projectId, pluginId: selection.plugin.id, releaseId: selection.plugin.releaseId, context: selection.context,
-        kind: selection.action.kind, actionId: selection.action.id, consumerId: crypto.randomUUID(),
+        kind: selection.action.kind, actionId: selection.action.id, consumerId: randomUUID(),
         locale: i18n.language, theme: resolvedTheme,
       })
       if (!mounted.current) { await releasePluginConsumer(runtime); return }

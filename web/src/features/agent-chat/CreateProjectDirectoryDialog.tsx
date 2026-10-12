@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { randomUUID } from '@/lib/uuid'
 import { Gamepad2, Puzzle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -54,7 +55,7 @@ export function CreateProjectDirectoryDialog({ open, onOpenChange, extension = f
           try {
             await management('/development', 'POST', {
               kind, projectId: project.id,
-              relativePath: '.', id: packageId.trim() || `extension.${crypto.randomUUID()}`,
+              relativePath: '.', id: packageId.trim() || `extension.${randomUUID()}`,
               name: { 'zh-CN': name.trim(), 'en-US': name.trim() },
             })
             project.hasGuide = true

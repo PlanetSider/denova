@@ -3,6 +3,7 @@ import type { ChatRequestOptions, ChatTransport, UIMessageChunk } from 'ai'
 import type { AgentUIMessage } from '@/lib/agent-ui'
 import { AgentStreamProjection, applyAgentStreamUpdates, isAgentDataChunk } from '@/lib/agent-stream-projection'
 import { createRafUpdateBatcher } from '@/lib/streaming/raf-update-batcher'
+import { randomUUID } from '@/lib/uuid'
 
 type Status = 'ready' | 'submitted' | 'streaming' | 'error'
 type MessageUpdate = AgentUIMessage[] | ((current: AgentUIMessage[]) => AgentUIMessage[])
@@ -32,7 +33,7 @@ export function useAgentStream(options: StreamOptions) {
   const [status, setStatus] = useState<Status>('ready')
   const [error, setError] = useState<Error>()
   const connection = useRef<Connection | null>(null)
-  const chatID = useRef(crypto.randomUUID())
+  const chatID = useRef(randomUUID())
   const setMessages = useCallback((update: MessageUpdate) => {
     const next = typeof update === 'function' ? update(currentMessages.current) : update
     currentMessages.current = next
@@ -112,7 +113,7 @@ export function useAgentStream(options: StreamOptions) {
   }, [batcher, disconnect, setMessages])
 
   const sendMessage = useCallback((message: Omit<AgentUIMessage, 'id'> & { id?: string }, request: ChatRequestOptions = {}) => {
-    const user = { ...message, id: message.id || crypto.randomUUID() }
+    const user = { ...message, id: message.id || randomUUID() }
     setMessages(current => [...current, user])
     return connect('submit', active => options.transport.sendMessages({
       ...request, trigger: 'submit-message', chatId: chatID.current, messageId: user.id,

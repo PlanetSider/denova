@@ -1,5 +1,6 @@
 import type { UIMessageChunk } from 'ai'
 import type { AgentMessageMetadata, AgentUIMessage } from './agent-ui'
+import { randomUUID } from './uuid'
 
 type Part = AgentUIMessage['parts'][number]
 type ToolPart = Extract<Part, { type: 'dynamic-tool' }>
@@ -12,7 +13,7 @@ export function isAgentDataChunk(chunk: UIMessageChunk): chunk is Extract<UIMess
  * and the current render batch are retained here; completed history belongs to
  * the UI window. Published messages are immutable and share unchanged bodies. */
 export class AgentStreamProjection {
-  private streamID: string = crypto.randomUUID()
+  private streamID: string = randomUUID()
   private metadata: AgentMessageMetadata = {}
   private active = new Map<string, AgentUIMessage>()
   private updates = new Map<string, AgentUIMessage>()

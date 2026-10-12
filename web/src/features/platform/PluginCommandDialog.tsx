@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { InlineErrorNotice } from '@/components/common/inline-error-notice'
+import { randomUUID } from '@/lib/uuid'
 import { ConfigurationForm, configurationValidator } from './ConfigurationForm'
 import { consumer, localized, management, releasePluginConsumer, platformError, type RuntimeSnapshot } from './api'
 import { type PluginActionSelection } from './PluginWorkspace'
@@ -40,7 +41,7 @@ export function PluginCommandDialog({ selection, onClose }: { selection: PluginA
       // Await admission even after cancellation so a late runtime is released.
       runtime = await management<RuntimeSnapshot>('/plugin-actions/open', 'POST', {
         projectId: selection.projectId, pluginId: selection.plugin.id, releaseId: selection.plugin.releaseId, context: selection.context,
-        kind: 'command', actionId: selection.action.id, consumerId: crypto.randomUUID(), locale: i18n.language, theme: resolvedTheme,
+        kind: 'command', actionId: selection.action.id, consumerId: randomUUID(), locale: i18n.language, theme: resolvedTheme,
       })
       activeRuntime.current = runtime
       controller.signal.throwIfAborted()

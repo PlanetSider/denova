@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from 'next-themes'
+import { randomUUID } from '@/lib/uuid'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, PanelRightClose, PanelRightOpen } from 'lucide-react'
 import { LoreWorkspaceTab } from '@/features/lore/LoreWorkspaceTab'
@@ -121,7 +122,7 @@ function ProjectPluginPage({ page, projectId, visible, loreReferenceLabels, lore
       context: 'general',
       kind: 'page',
       actionId: page.id,
-      consumerId: crypto.randomUUID(),
+      consumerId: randomUUID(),
       locale: i18n.language,
       theme: resolvedTheme,
     })

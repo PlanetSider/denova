@@ -57,6 +57,9 @@ Denova records only major user-visible features, important compatibility or data
 
 ### Fixed / 修复
 
+- 修复通过局域网 HTTP 地址访问时前端崩溃的问题：`crypto.randomUUID` 仅在安全上下文可用，相关标识符生成改为带回退实现（HTTPS 与 localhost 行为不变）。
+- Fix a frontend crash when accessing Denova over plain LAN HTTP: `crypto.randomUUID` is only available in secure contexts, so identifier generation now falls back to a random-values implementation (HTTPS and localhost behavior unchanged).
+
 - 减少 Agent 恢复时重复扫描历史子任务、写作、通用会话、游戏分支及 Native 子会话日志的等待；连接恢复支持自动退避重试和失败后的手动重试，保留已接受的运行。
 - Reduced Agent recovery delays from repeated scans of historical subtasks, Writing/General conversations, Game branches, and Native child-session journals. Connection recovery now retries with backoff and offers a manual retry while preserving accepted runs.
 

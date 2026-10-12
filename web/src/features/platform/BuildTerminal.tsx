@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { TerminalTabView } from '@/features/agent-chat/terminal/TerminalTabView'
+import { randomUUID } from '@/lib/uuid'
 import {
   closeTerminalSession,
   terminalAttachURL,
@@ -34,7 +35,7 @@ export function BuildTerminal({
   const { t } = useTranslation()
   const [tab] = useState<AgentChatTerminalTab>({
     kind: 'terminal',
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     projectId,
     workspace: '',
     group: 'primary',
