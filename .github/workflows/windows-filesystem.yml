@@ -1,23 +1,6 @@
 name: Windows filesystem durability
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/windows-filesystem.yml"
-      - "go.mod"
-      - "go.sum"
-      - "internal/localfs/**"
-      - "internal/portablepath/**"
-      - "internal/project/**"
-      - "internal/app/**"
-      - "config/**"
-      - "internal/workspace/documentreview/**"
-      - "internal/workspace/change/**"
-      - "agent/go.mod"
-      - "agent/go.sum"
-      - "agent/tool/builtin/**"
   pull_request:
     paths:
       - ".github/workflows/windows-filesystem.yml"
