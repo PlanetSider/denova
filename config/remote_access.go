@@ -4,8 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -149,6 +152,59 @@ func HashRemoteAccessPassword(password string) (string, error) {
 		return "", fmt.Errorf("生成远程访问密码哈希失败: %w", err)
 	}
 	return string(hash), nil
+}
+
+// Environment-provided passwords must map to one stable hash: issued browser
+// sessions snapshot the hash and bcrypt salts randomly, so re-hashing on every
+// config load or restart would invalidate every login. The hash is cached per
+// process and persisted (hash only, never the plaintext) beside the session
+// store, then validated against the current password before reuse.
+var envPasswordHash struct {
+	mu       sync.Mutex
+	password string
+	hash     string
+}
+
+const envPasswordHashFile = "remote-access-env-hash"
+
+func resolveEnvPasswordHash(password, dataDir string) (string, error) {
+	password = strings.TrimSpace(password)
+	if password == "" {
+		return "", ErrRemoteAccessPasswordRequired
+	}
+	envPasswordHash.mu.Lock()
+	defer envPasswordHash.mu.Unlock()
+	if password == envPasswordHash.password && envPasswordHash.hash != "" {
+		return envPasswordHash.hash, nil
+	}
+	hash := ""
+	cachePath := ""
+	if strings.TrimSpace(dataDir) != "" {
+		cachePath = filepath.Join(dataDir, envPasswordHashFile)
+		if data, err := os.ReadFile(cachePath); err == nil {
+			stored := strings.TrimSpace(string(data))
+			if CheckRemoteAccessPassword(stored, password) {
+				hash = stored
+			}
+		}
+	}
+	if hash == "" {
+		generated, err := HashRemoteAccessPassword(password)
+		if err != nil {
+			return "", err
+		}
+		hash = generated
+		if cachePath != "" {
+			if err := os.MkdirAll(dataDir, 0o700); err == nil {
+				// Best effort: without the file the hash still stays stable
+				// for the lifetime of the process.
+				_ = os.WriteFile(cachePath, []byte(hash+"\n"), 0o600)
+			}
+		}
+	}
+	envPasswordHash.password = password
+	envPasswordHash.hash = hash
+	return hash, nil
 }
 
 func CheckRemoteAccessPassword(hash, password string) bool {

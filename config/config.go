@@ -626,7 +626,10 @@ func overrideFromEnv(cfg *Config) {
 		cfg.RemoteAccessUsername = v
 	}
 	if v := strings.TrimSpace(envCompat("DENOVA_REMOTE_ACCESS_PASSWORD", "NOVA_REMOTE_ACCESS_PASSWORD")); v != "" {
-		if hash, err := HashRemoteAccessPassword(v); err == nil {
+		// bcrypt salts randomly, so resolve a stable hash (process + data-dir
+		// cached) instead of re-hashing on every config load, which would
+		// invalidate all issued browser sessions.
+		if hash, err := resolveEnvPasswordHash(v, cfg.DataDir()); err == nil {
 			cfg.RemoteAccessPasswordHash = hash
 		} else {
 			slog.WarnContext(context.Background(), "[config] ignored DENOVA_REMOTE_ACCESS_PASSWORD", "error", err)

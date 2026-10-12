@@ -2,8 +2,52 @@ package config
 
 import (
 	"net"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
+
+func TestResolveEnvPasswordHashStability(t *testing.T) {
+	dataDir := t.TempDir()
+	first, err := resolveEnvPasswordHash("secret-pass", dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Repeated config loads resolve the identical hash.
+	second, err := resolveEnvPasswordHash("secret-pass", dataDir)
+	if err != nil || second != first {
+		t.Fatalf("hash not stable in process: %q %q", first, second)
+	}
+	// The cache stores a bcrypt hash, never the plaintext password.
+	raw, err := os.ReadFile(filepath.Join(dataDir, envPasswordHashFile))
+	if err != nil || !strings.HasPrefix(string(raw), "$2") || strings.Contains(string(raw), "secret-pass") {
+		t.Fatalf("cache file content: %q err=%v", raw, err)
+	}
+	// A fresh process reuses the persisted hash instead of re-salting.
+	envPasswordHash.password, envPasswordHash.hash = "", ""
+	reused, err := resolveEnvPasswordHash("secret-pass", dataDir)
+	if err != nil || reused != first {
+		t.Fatalf("persisted hash not reused: %q %q", first, reused)
+	}
+	// Changing the password rotates the hash and keeps it valid.
+	changed, err := resolveEnvPasswordHash("new-pass", dataDir)
+	if err != nil || changed == first {
+		t.Fatalf("password change did not rotate hash: %q", changed)
+	}
+	if !CheckRemoteAccessPassword(changed, "new-pass") {
+		t.Fatal("rotated hash does not match the new password")
+	}
+	// A persisted hash that still matches is preferred verbatim.
+	envPasswordHash.password, envPasswordHash.hash = "", ""
+	if err := os.WriteFile(filepath.Join(dataDir, envPasswordHashFile), []byte(first+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	restored, err := resolveEnvPasswordHash("secret-pass", dataDir)
+	if err != nil || restored != first {
+		t.Fatalf("valid persisted hash not reused: %q %q", first, restored)
+	}
+}
 
 func TestSelectLANAddress(t *testing.T) {
 	for _, test := range []struct {
