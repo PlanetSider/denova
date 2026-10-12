@@ -14,6 +14,9 @@ Denova records only major user-visible features, important compatibility or data
 
 ### Added / 新增
 
+- 新增 Docker Compose 部署支持与 GHCR 镜像自动构建（`ghcr.io/planetsider/denova`，linux/amd64 与 linux/arm64）；远程访问凭据支持通过环境变量注入，数据目录支持绑定挂载持久化。
+- Adds Docker Compose deployment support with automated GHCR image builds (`ghcr.io/planetsider/denova`, linux/amd64 and linux/arm64); remote access credentials can be provided via environment variables and data persists through bind mounts.
+
 - 语言模型连接新增 Gemini 原生协议，支持工具调用、图片输入与会话恢复。
 - Language model connections add the native Gemini protocol with tool calls, image inputs and session recovery.
 

@@ -39,9 +39,11 @@ docs/tests/*
 !docs/resource-pack-import-export-design.md
 !docs/speech.md
 !docs/agent-runtime-session-design-audit.md
+!docs/docker-compose.md
 .worktrees/
 .pnpm-store/
 .DS_Store
+.env
 .denova
 .nova
 prd

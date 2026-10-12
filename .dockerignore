@@ -1,0 +1,14 @@
+# Keep the Docker build context small and reproducible.
+.git
+.env
+data/
+output/
+dist/
+log/
+img/
+.workbuddy
+web/node_modules/
+web/dist/
+web/playwright-report/
+web/test-results/
+internal/webfs/dist/

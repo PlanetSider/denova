@@ -1,0 +1,24 @@
+# Denova Docker Compose 部署。
+# 数据通过 ./data 绑定挂载持久化，不使用 Docker named volume。
+services:
+  denova:
+    image: ghcr.io/planetsider/denova:latest
+    container_name: denova
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      DENOVA_DIR: /data/.denova
+      DENOVA_WORKSPACE: /data/workspace
+      DENOVA_ALLOW_LAN_ACCESS: "true"
+      DENOVA_REMOTE_ACCESS_USERNAME: ${DENOVA_USERNAME:-admin}
+      DENOVA_REMOTE_ACCESS_PASSWORD: ${DENOVA_PASSWORD:?Copy .env.example to .env and set DENOVA_PASSWORD first}
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/auth/status').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
