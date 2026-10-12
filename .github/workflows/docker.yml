@@ -4,6 +4,21 @@ on:
   push:
     branches: [master]
     tags: ['v*']
+    # Documentation-only pushes do not change the image. Note: new refs
+    # (such as release tags) always run regardless of these filters, so
+    # version tags keep building release images.
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'README.en.md'
+      - 'CHANGELOG.md'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'CONTRIBUTING.md'
+      - 'DESIGN.md'
+      - 'LICENSE'
+      - 'img/**'
+      - 'docker-compose.yml'
   pull_request:
     branches: [master]
   workflow_dispatch:
