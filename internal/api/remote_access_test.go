@@ -157,6 +157,29 @@ func TestRemoteAccessOriginAndHTTPSCookie(t *testing.T) {
 	}
 }
 
+func TestRemoteAccessTrustedProxyForwardedOrigin(t *testing.T) {
+	// A TLS-terminating proxy forwards the browser's HTTPS origin while the
+	// backend itself speaks plain HTTP on a non-loopback peer address.
+	c := &app.RequestContext{}
+	c.Request.SetRequestURI("http://192.168.1.9:8080/api/auth/login")
+	c.Request.Header.SetMethod("POST")
+	c.Request.Header.Set("Origin", "https://denova.test")
+	c.Request.Header.Set("X-Forwarded-Host", "denova.test")
+	c.Request.Header.Set("X-Forwarded-Proto", "https")
+
+	if sameOriginRequest(c, false) {
+		t.Fatal("forwarded headers were trusted from an untrusted peer")
+	}
+	if !sameOriginRequest(c, true) {
+		t.Fatal("forwarded headers were rejected from the trusted proxy")
+	}
+	// Spoofed forwarded headers must not match an unrelated Host.
+	c.Request.Header.Set("X-Forwarded-Host", "attacker.test")
+	if sameOriginRequest(c, true) {
+		t.Fatal("mismatched forwarded host was accepted")
+	}
+}
+
 func TestRemoteAccessCorruptStoreFailsClosed(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "remote-access-sessions.json")

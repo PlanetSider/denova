@@ -37,12 +37,13 @@ func (g *remoteAccessGate) middleware(ctx context.Context, c *app.RequestContext
 	// Isolated plugin/game views must not read legacy APIs through the host's
 	// cookies or embed private resources as images, frames, or scripts.
 	c.Response.Header.Set("Cross-Origin-Resource-Policy", "same-origin")
-	if strings.HasPrefix(string(c.Path()), "/api/") && (len(c.GetHeader("Origin")) > 0 || len(c.GetHeader("Referer")) > 0) && !sameOriginRequest(c) {
+	trustForwarded := g.config().TrustedProxy || isLocalClientIP(directClientIP(c))
+	if strings.HasPrefix(string(c.Path()), "/api/") && (len(c.GetHeader("Origin")) > 0 || len(c.GetHeader("Referer")) > 0) && !sameOriginRequest(c, trustForwarded) {
 		abortWithLocalizedError(c, consts.StatusForbidden, "api.access.originRejected")
 		return
 	}
 	// Cookies also accompany browser-initiated writes and WebSocket upgrades.
-	if needsOriginCheck(c) && !sameOriginRequest(c) {
+	if needsOriginCheck(c) && !sameOriginRequest(c, trustForwarded) {
 		abortWithLocalizedError(c, consts.StatusForbidden, "api.access.originRejected")
 		return
 	}
@@ -80,7 +81,7 @@ func needsOriginCheck(c *app.RequestContext) bool {
 	return (method != "GET" && method != "HEAD" && method != "OPTIONS") || strings.EqualFold(string(c.GetHeader("Upgrade")), "websocket")
 }
 
-func sameOriginRequest(c *app.RequestContext) bool {
+func sameOriginRequest(c *app.RequestContext, trustForwarded bool) bool {
 	origin := string(c.GetHeader("Origin"))
 	if origin == "" {
 		origin = string(c.GetHeader("Referer"))
@@ -95,7 +96,9 @@ func sameOriginRequest(c *app.RequestContext) bool {
 	}
 	host := string(c.Host())
 	scheme := string(c.Request.URI().Scheme())
-	if isLocalClientIP(directClientIP(c)) {
+	// Forwarded headers are honored from the trusted proxy peer or a loopback
+	// peer; anything else cannot rewrite the apparent origin.
+	if trustForwarded {
 		if forwarded := string(c.GetHeader("X-Forwarded-Host")); forwarded != "" {
 			host = forwarded
 		}
@@ -254,7 +257,7 @@ func (g *remoteAccessGate) pair(ctx context.Context, c *app.RequestContext) {
 
 func (g *remoteAccessGate) setCookie(c *app.RequestContext, token string, maxAge int) {
 	secure := string(c.Request.URI().Scheme()) == "https"
-	if isLocalClientIP(directClientIP(c)) && strings.EqualFold(string(c.GetHeader("X-Forwarded-Proto")), "https") {
+	if (g.config().TrustedProxy || isLocalClientIP(directClientIP(c))) && strings.EqualFold(string(c.GetHeader("X-Forwarded-Proto")), "https") {
 		secure = true
 	}
 	c.SetCookie(g.cookieName, token, maxAge, "/", "", protocol.CookieSameSiteLaxMode, secure, true)

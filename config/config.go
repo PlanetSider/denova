@@ -49,6 +49,10 @@ type Config struct {
 	AllowLANAccess           bool                         `toml:"allow_lan_access"`
 	RemoteAccessUsername     string                       `toml:"remote_access_username"`
 	RemoteAccessPasswordHash string                       `toml:"remote_access_password_hash"`
+	// TrustedProxy is runtime-only (DENOVA_TRUST_PROXY); it is never written
+	// back to configuration files. It lets a reverse proxy that terminates
+	// HTTPS hand its forwarded host/proto headers to the access gate.
+	TrustedProxy bool `toml:"-"`
 	Language                 string                       `toml:"language"`
 	DenovaDir                string                       `toml:"denova_dir"`
 	NovaDir                  string                       `toml:"nova_dir"`
@@ -628,6 +632,11 @@ func overrideFromEnv(cfg *Config) {
 			slog.WarnContext(context.Background(), "[config] ignored DENOVA_REMOTE_ACCESS_PASSWORD", "error", err)
 		}
 	}
+	if v := envCompat("DENOVA_TRUST_PROXY", "NOVA_TRUST_PROXY"); v != "" {
+		if trusted, err := strconv.ParseBool(strings.TrimSpace(v)); err == nil {
+			cfg.TrustedProxy = trusted
+		}
+	}
 }
 
 // ApplyModelEnvironment reapplies the released model environment variables
@@ -701,6 +710,7 @@ func (cfg *Config) RemoteAccessConfig() RemoteAccessConfig {
 		AllowLANAccess: cfg.AllowLANAccess,
 		Username:       cfg.RemoteAccessUsername,
 		PasswordHash:   cfg.RemoteAccessPasswordHash,
+		TrustedProxy:   cfg.TrustedProxy,
 	}
 }
 

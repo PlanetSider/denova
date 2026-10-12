@@ -55,6 +55,7 @@ docker compose up -d
 
 - 首次登录必须使用 compose 文件中配置的凭据；登录后浏览器会话保持 30 天。
 - 通过公网或域名访问时，请使用 Caddy、Nginx 等反向代理提供 HTTPS，避免明文传输登录凭据。反代需要支持 SSE 与 WebSocket（终端、Agent 流式输出）。
+- 经 HTTPS 反向代理访问时，须在 compose 中设置 `DENOVA_TRUST_PROXY: "true"`（仅在反代与容器直连、且代理会发送 `X-Forwarded-Host/Proto` 时开启；Caddy、Nginx、NAS 自带反代默认满足）。否则后端会因同源校验拒绝请求，页面提示「此请求的来源不受信任」并返回 403。直连 HTTP 访问保持 `false`。开启后所有远程用户仍需登录，仅本机（loopback）管理操作不受影响。
 - Native 模式开箱即用；Codex / Claude Code 运行时需要在镜像内另装对应 CLI 并挂载其凭据目录（例如 `~/.codex`），镜像默认不包含。
 - 自动化浏览器工具依赖容器内的 Chrome/Chromium/Edge，镜像默认未安装；未安装时该工具不启用，其余功能不受影响。
 - 部分本机管理操作（目录选择、文件 reveal、部分资源导入导出管理）按设计仅限运行 Denova 的本机使用，远程浏览器中会提示不可用，这是预期行为。

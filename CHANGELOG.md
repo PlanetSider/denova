@@ -17,6 +17,9 @@ Denova records only major user-visible features, important compatibility or data
 - 新增 Docker Compose 部署支持与 GHCR 镜像自动构建（`ghcr.io/planetsider/denova`，linux/amd64 与 linux/arm64）；远程访问凭据支持通过环境变量注入，数据目录支持绑定挂载持久化。
 - Adds Docker Compose deployment support with automated GHCR image builds (`ghcr.io/planetsider/denova`, linux/amd64 and linux/arm64); remote access credentials can be provided via environment variables and data persists through bind mounts.
 
+- 新增 `DENOVA_TRUST_PROXY` 运行时开关：经 HTTPS 反向代理部署时可信任代理转发的 Host/Proto 头，解决非本机反代下同源校验拒绝访问的问题；直连部署不受影响。
+- Adds a `DENOVA_TRUST_PROXY` runtime switch: deployments behind an HTTPS reverse proxy can now trust the proxy's forwarded Host/Proto headers, fixing origin-check rejections for non-loopback proxies. Direct deployments are unaffected.
+
 - 语言模型连接新增 Gemini 原生协议，支持工具调用、图片输入与会话恢复。
 - Language model connections add the native Gemini protocol with tool calls, image inputs and session recovery.
 

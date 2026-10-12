@@ -26,6 +26,9 @@ type RemoteAccessConfig struct {
 	AllowLANAccess bool
 	Username       string
 	PasswordHash   string
+	// TrustedProxy lets the access gate trust X-Forwarded-Host/Proto from the
+	// direct peer, for deployments where a reverse proxy terminates HTTPS.
+	TrustedProxy bool
 }
 
 func HTTPListenHost(allowLANAccess bool) string {

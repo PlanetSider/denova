@@ -14,6 +14,9 @@ services:
       DENOVA_DIR: /data/.denova
       DENOVA_WORKSPACE: /data/workspace
       DENOVA_ALLOW_LAN_ACCESS: "true"
+      # 通过 HTTPS 反向代理（NAS 远程访问、Caddy/Nginx 等）访问时改为 "true"，
+      # 让后端信任代理的 X-Forwarded-Host/Proto；直连 HTTP 保持 "false"。
+      DENOVA_TRUST_PROXY: "false"
       # 远程登录凭据；首次启动前务必修改密码。
       DENOVA_REMOTE_ACCESS_USERNAME: admin
       DENOVA_REMOTE_ACCESS_PASSWORD: change-me
