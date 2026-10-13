@@ -17,6 +17,9 @@ services:
       # 通过 HTTPS 反向代理（NAS 远程访问、Caddy/Nginx 等）访问时改为 "true"，
       # 让后端信任代理的 X-Forwarded-Host/Proto；直连 HTTP 保持 "false"。
       DENOVA_TRUST_PROXY: "false"
+      # 允许远程浏览器执行资源导入导出、插件管理等本机操作；登录鉴权仍保留。
+      # 容器部署通常为 "true"；目录选择/文件打开等依赖系统桌面的操作仍不可用。
+      DENOVA_REMOTE_MANAGE: "true"
       # 远程登录凭据；首次启动前务必修改密码。
       DENOVA_REMOTE_ACCESS_USERNAME: admin
       DENOVA_REMOTE_ACCESS_PASSWORD: change-me

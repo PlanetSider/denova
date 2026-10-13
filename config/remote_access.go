@@ -32,6 +32,10 @@ type RemoteAccessConfig struct {
 	// TrustedProxy lets the access gate trust X-Forwarded-Host/Proto from the
 	// direct peer, for deployments where a reverse proxy terminates HTTPS.
 	TrustedProxy bool
+	// RemoteManage lifts the loopback-only restriction on machine-side
+	// operations (resource import/export, plugin management) for headless
+	// server deployments; browser authentication still applies.
+	RemoteManage bool
 }
 
 func HTTPListenHost(allowLANAccess bool) string {

@@ -20,6 +20,9 @@ Denova records only major user-visible features, important compatibility or data
 - 新增 `DENOVA_TRUST_PROXY` 运行时开关：经 HTTPS 反向代理部署时可信任代理转发的 Host/Proto 头，解决非本机反代下同源校验拒绝访问的问题；直连部署不受影响。
 - Adds a `DENOVA_TRUST_PROXY` runtime switch: deployments behind an HTTPS reverse proxy can now trust the proxy's forwarded Host/Proto headers, fixing origin-check rejections for non-loopback proxies. Direct deployments are unaffected.
 
+- 新增 `DENOVA_REMOTE_MANAGE` 运行时开关：服务器部署可放开资源导入导出、插件平台管理等"仅本机"操作限制（登录鉴权不变），修复容器部署下资源中心添加资源包返回 403 的问题；桌面部署默认行为不变。
+- Adds a `DENOVA_REMOTE_MANAGE` runtime switch: server deployments can lift the loopback-only restriction on resource import/export and plugin management (authentication unchanged), fixing the 403 when adding resource packs from the resource center in container deployments. Desktop behavior is unchanged.
+
 - 语言模型连接新增 Gemini 原生协议，支持工具调用、图片输入与会话恢复。
 - Language model connections add the native Gemini protocol with tool calls, image inputs and session recovery.
 

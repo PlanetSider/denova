@@ -53,6 +53,9 @@ type Config struct {
 	// back to configuration files. It lets a reverse proxy that terminates
 	// HTTPS hand its forwarded host/proto headers to the access gate.
 	TrustedProxy bool `toml:"-"`
+	// RemoteManage is runtime-only (DENOVA_REMOTE_MANAGE); it lets headless
+	// server deployments perform machine-side operations from the browser.
+	RemoteManage bool `toml:"-"`
 	Language                 string                       `toml:"language"`
 	DenovaDir                string                       `toml:"denova_dir"`
 	NovaDir                  string                       `toml:"nova_dir"`
@@ -640,6 +643,11 @@ func overrideFromEnv(cfg *Config) {
 			cfg.TrustedProxy = trusted
 		}
 	}
+	if v := envCompat("DENOVA_REMOTE_MANAGE", "NOVA_REMOTE_MANAGE"); v != "" {
+		if enabled, err := strconv.ParseBool(strings.TrimSpace(v)); err == nil {
+			cfg.RemoteManage = enabled
+		}
+	}
 }
 
 // ApplyModelEnvironment reapplies the released model environment variables
@@ -714,6 +722,7 @@ func (cfg *Config) RemoteAccessConfig() RemoteAccessConfig {
 		Username:       cfg.RemoteAccessUsername,
 		PasswordHash:   cfg.RemoteAccessPasswordHash,
 		TrustedProxy:   cfg.TrustedProxy,
+		RemoteManage:   cfg.RemoteManage,
 	}
 }
 

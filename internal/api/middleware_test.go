@@ -86,3 +86,16 @@ func TestLocalHostEffectMiddlewareRejectsForwardedRemoteClient(t *testing.T) {
 		t.Fatalf("remote host effect response = %d called=%v body=%s", response.Code, called, response.Body.String())
 	}
 }
+
+func TestLocalEffectAllowed(t *testing.T) {
+	// The unit-test peer is the unspecified address, so requestClientIP
+	// substitutes the forwarded-for value, simulating a remote browser.
+	c := &app.RequestContext{}
+	c.Request.Header.Set("X-Forwarded-For", "192.168.1.8")
+	if localEffectAllowed(false, c) {
+		t.Fatal("machine-side operations were allowed for a remote client")
+	}
+	if !localEffectAllowed(true, c) {
+		t.Fatal("remote manage did not lift the loopback restriction")
+	}
+}

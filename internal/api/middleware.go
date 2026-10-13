@@ -44,11 +44,18 @@ func corsMiddleware(ctx context.Context, c *app.RequestContext) {
 	c.Next(ctx)
 }
 
+// localEffectAllowed reports whether machine-side operations may run for this
+// request. Headless server deployments can lift the loopback restriction via
+// the remote-manage switch; browser authentication always still applies.
+func localEffectAllowed(remoteManage bool, c *app.RequestContext) bool {
+	return remoteManage || isLocalClientIP(requestClientIP(c))
+}
+
 // localHostEffectMiddleware prevents authenticated LAN clients from opening
 // windows on the machine that runs Denova. Remote browsers cannot usefully
 // select a server-local absolute path in any case.
 func localHostEffectMiddleware(ctx context.Context, c *app.RequestContext) {
-	if !isLocalClientIP(requestClientIP(c)) {
+	if !localEffectAllowed(false, c) {
 		abortWithLocalizedError(c, consts.StatusForbidden, "api.access.localHostEffect")
 		return
 	}

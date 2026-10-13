@@ -16,34 +16,46 @@ import (
 	"denova/internal/webfs"
 )
 
+// localEffectGuard lifts the loopback-only restriction on machine-side
+// operations when the deployment opts into remote management.
+func (s *Server) localEffectGuard() hertzapp.HandlerFunc {
+	return func(ctx context.Context, c *hertzapp.RequestContext) {
+		if !localEffectAllowed(s.app.RemoteAccessConfig().RemoteManage, c) {
+			abortWithLocalizedError(c, consts.StatusForbidden, "api.access.localHostEffect")
+			return
+		}
+		c.Next(ctx)
+	}
+}
+
 // registerRoutes 注册 HTTP API 和静态文件路由。
 func (s *Server) registerRoutes(h *hertzserver.Hertz) {
 	apiHandlers := handlers.New(s.app)
-	h.Any("/api/platform/manage/*path", localHostEffectMiddleware, apiHandlers.HandlePlatformManagement)
+	h.Any("/api/platform/manage/*path", s.localEffectGuard(), apiHandlers.HandlePlatformManagement)
 	api := h.Group("/api")
 	{
 		api.POST("/autosave-conflicts", apiHandlers.HandleAutosaveConflictCreate)
 		api.GET("/resource-market/catalog", apiHandlers.HandleResourceMarketCatalog)
-		api.POST("/resource-exchange/previews", localHostEffectMiddleware, apiHandlers.HandleResourcePreview)
+		api.POST("/resource-exchange/previews", s.localEffectGuard(), apiHandlers.HandleResourcePreview)
 		api.GET("/resource-exchange/previews/:id/files", apiHandlers.HandleResourcePreviewFiles)
-		api.DELETE("/resource-exchange/previews/:id", localHostEffectMiddleware, apiHandlers.HandleResourceDiscard)
-		api.POST("/resource-exchange/plans", localHostEffectMiddleware, apiHandlers.HandleResourcePlan)
-		api.POST("/resource-exchange/plans/:id/apply", localHostEffectMiddleware, apiHandlers.HandleResourceApply)
+		api.DELETE("/resource-exchange/previews/:id", s.localEffectGuard(), apiHandlers.HandleResourceDiscard)
+		api.POST("/resource-exchange/plans", s.localEffectGuard(), apiHandlers.HandleResourcePlan)
+		api.POST("/resource-exchange/plans/:id/apply", s.localEffectGuard(), apiHandlers.HandleResourceApply)
 		api.GET("/resource-exchange/installations", apiHandlers.HandleResourceInstallations)
 		api.GET("/resource-exchange/export-resources", apiHandlers.HandleResourceExportChoices)
-		api.POST("/resource-exchange/exports", localHostEffectMiddleware, apiHandlers.HandleResourceExportPlan)
+		api.POST("/resource-exchange/exports", s.localEffectGuard(), apiHandlers.HandleResourceExportPlan)
 		api.GET("/resource-exchange/exports/:id/download", apiHandlers.HandleResourceExportDownload)
 		api.GET("/resource-exchange/export-definitions", apiHandlers.HandleResourceExportDefinitions)
-		api.PUT("/resource-exchange/export-definitions", localHostEffectMiddleware, apiHandlers.HandleResourceExportDefinitions)
-		api.DELETE("/resource-exchange/export-definitions/:id", localHostEffectMiddleware, apiHandlers.HandleResourceExportDefinitionDelete)
-		api.POST("/resource-exchange/export", localHostEffectMiddleware, apiHandlers.HandleResourceExport)
+		api.PUT("/resource-exchange/export-definitions", s.localEffectGuard(), apiHandlers.HandleResourceExportDefinitions)
+		api.DELETE("/resource-exchange/export-definitions/:id", s.localEffectGuard(), apiHandlers.HandleResourceExportDefinitionDelete)
+		api.POST("/resource-exchange/export", s.localEffectGuard(), apiHandlers.HandleResourceExport)
 		api.GET("/resource-exchange/installations/:id/backups", apiHandlers.HandleResourceBackups)
 		api.GET("/resource-exchange/backups/:id/download", apiHandlers.HandleResourceBackupDownload)
-		api.POST("/resource-exchange/backups/:id/restore-plan", localHostEffectMiddleware, apiHandlers.HandleResourceBackupPlan)
-		api.POST("/resource-exchange/installations/:id/detach", localHostEffectMiddleware, apiHandlers.HandleResourceDetach)
-		api.POST("/resource-exchange/installations/:id/check", localHostEffectMiddleware, apiHandlers.HandleResourceCheckUpdate)
-		api.POST("/resource-exchange/installations/:id/policy", localHostEffectMiddleware, apiHandlers.HandleResourceUpdateMode)
-		api.POST("/resource-market/catalog/refresh", localHostEffectMiddleware, apiHandlers.HandleResourceMarketRefresh)
+		api.POST("/resource-exchange/backups/:id/restore-plan", s.localEffectGuard(), apiHandlers.HandleResourceBackupPlan)
+		api.POST("/resource-exchange/installations/:id/detach", s.localEffectGuard(), apiHandlers.HandleResourceDetach)
+		api.POST("/resource-exchange/installations/:id/check", s.localEffectGuard(), apiHandlers.HandleResourceCheckUpdate)
+		api.POST("/resource-exchange/installations/:id/policy", s.localEffectGuard(), apiHandlers.HandleResourceUpdateMode)
+		api.POST("/resource-market/catalog/refresh", s.localEffectGuard(), apiHandlers.HandleResourceMarketRefresh)
 		api.GET("/agent-runs", apiHandlers.HandleGlobalAgentRunTraces)
 		api.GET("/agent-runtimes", apiHandlers.HandleAgentEngines)
 		api.POST("/agent-runtimes/:id/check", apiHandlers.HandleAgentEngineCheck)
@@ -58,7 +70,7 @@ func (s *Server) registerRoutes(h *hertzserver.Hertz) {
 		projects.GET("/attachments/:attachment_id", apiHandlers.HandleAttachmentImage)
 		projects.PUT("/files/file", apiHandlers.HandleProjectFileSave)
 		projects.POST("/files/operations", apiHandlers.HandleProjectFileOperations)
-		projects.POST("/files/reveal", localHostEffectMiddleware, apiHandlers.HandleProjectFileReveal)
+		projects.POST("/files/reveal", s.localEffectGuard(), apiHandlers.HandleProjectFileReveal)
 		projects.GET("/book", apiHandlers.HandleProjectBookSnapshot)
 		projects.GET("/book/tree", apiHandlers.HandleProjectBookTree)
 		projects.GET("/book/summary", apiHandlers.HandleProjectBookSummary)
@@ -276,7 +288,7 @@ func (s *Server) registerRoutes(h *hertzserver.Hertz) {
 		api.POST("/update/install/stream", apiHandlers.HandleUpdateInstallStream)
 		api.POST("/update/upload", apiHandlers.HandleUpdateUpload)
 		api.POST("/update/apply", apiHandlers.HandleUpdateApply)
-		api.POST("/host/dialogs/directory", localHostEffectMiddleware, apiHandlers.HandleDirectoryPicker)
+		api.POST("/host/dialogs/directory", s.localEffectGuard(), apiHandlers.HandleDirectoryPicker)
 		api.GET("/agent-chat/projects", apiHandlers.HandleAgentChatProjects)
 		api.GET("/agent-chat/activity", apiHandlers.HandleAgentChatActivity)
 		api.POST("/agent-chat/projects", apiHandlers.HandleAgentChatProjectCreate)
